@@ -1,106 +1,504 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { trackByPhone, getComplaintById } from '../api/complaintApi'
-import StatusBadge from '../components/StatusBadge'
-import LoadingSpinner from '../components/LoadingSpinner'
-import { formatDate } from '../utils/helpers'
+// TrackComplaintPage.jsx
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+// Mock API functions (replace with actual imports)
+const trackByPhone = (phone) => {
+  return Promise.resolve({
+    data: {
+      data: [
+        {
+          complaint_id: 'CMP_874123',
+          category: 'Street Light Malfunction',
+          status: 'In Progress',
+          description: 'Street light not working for the past 3 days',
+          created_at: '2024-03-15T10:30:00Z',
+          area: 'Sector 5',
+          priority: 'High'
+        },
+        {
+          complaint_id: 'CMP_874456',
+          category: 'Garbage Collection',
+          status: 'Pending',
+          description: 'Garbage not collected for a week',
+          created_at: '2024-03-14T14:20:00Z',
+          area: 'Sector 8',
+          priority: 'Medium'
+        }
+      ]
+    }
+  });
+};
+
+const getComplaintById = (id) => {
+  return Promise.resolve({
+    data: {
+      data: {
+        complaint_id: id || 'CMP_874123',
+        category: 'Street Light Malfunction',
+        status: 'In Progress',
+        description: 'Street light not working for the past 3 days. Area is completely dark at night.',
+        created_at: '2024-03-15T10:30:00Z',
+        area: 'Sector 5',
+        priority: 'High',
+        name: 'Rahul Sharma',
+        phone_number: '+91 98765 43210',
+        address: '123, Main Street, Sector 5',
+        expected_resolution: '2024-03-18T00:00:00Z'
+      }
+    }
+  });
+};
+
+// Status Badge Component
+const StatusBadge = ({ status }) => {
+  const getStatusConfig = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'pending':
+        return { 
+          color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+          icon: '⏳',
+          label: 'Pending'
+        };
+      case 'in progress':
+        return { 
+          color: 'bg-blue-100 text-blue-800 border-blue-200', 
+          icon: '🔄',
+          label: 'In Progress'
+        };
+      case 'resolved':
+        return { 
+          color: 'bg-green-100 text-green-800 border-green-200', 
+          icon: '✅',
+          label: 'Resolved'
+        };
+      case 'rejected':
+        return { 
+          color: 'bg-red-100 text-red-800 border-red-200', 
+          icon: '❌',
+          label: 'Rejected'
+        };
+      default:
+        return { 
+          color: 'bg-gray-100 text-gray-800 border-gray-200', 
+          icon: '📋',
+          label: status
+        };
+    }
+  };
+
+  const config = getStatusConfig(status);
+  
+  return (
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${config.color}`}>
+      <span className="mr-1">{config.icon}</span>
+      {config.label}
+    </span>
+  );
+};
+
+// Loading Spinner Component
+const LoadingSpinner = () => (
+  <div className="flex justify-center py-12">
+    <div className="relative">
+      <div className="w-12 h-12 border-4 border-blue-200 rounded-full"></div>
+      <div className="w-12 h-12 border-4 border-blue-600 rounded-full animate-spin absolute top-0 left-0 border-t-transparent"></div>
+    </div>
+  </div>
+);
+
+// Format Date Helper
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('en-US', options);
+};
 
 export default function TrackComplaintPage() {
-  const [mode, setMode] = useState('phone') // 'phone' | 'id'
-  const [input, setInput] = useState('')
-  const [results, setResults] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [mode, setMode] = useState('phone');
+  const [input, setInput] = useState('');
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [recentSearches, setRecentSearches] = useState([]);
 
   const handleSearch = async (e) => {
-    e.preventDefault()
-    if (!input.trim()) { setError('Please enter a value.'); return }
-    setError('')
-    setResults(null)
-    setLoading(true)
+    e.preventDefault();
+    if (!input.trim()) { 
+      setError('Please enter a value.'); 
+      return; 
+    }
+    
+    setError('');
+    setResults(null);
+    setLoading(true);
 
     try {
+      let response;
       if (mode === 'phone') {
-        const res = await trackByPhone(input.trim())
-        setResults(res.data.data)
+        if (!/^\d{10}$/.test(input.trim())) {
+          setError('Please enter a valid 10-digit phone number');
+          setLoading(false);
+          return;
+        }
+        response = await trackByPhone(input.trim());
+        setResults(response.data.data);
       } else {
-        const res = await getComplaintById(input.trim())
-        setResults([res.data.data])
+        response = await getComplaintById(input.trim());
+        setResults([response.data.data]);
       }
-    } catch {
-      setError('No complaints found.')
+      
+      // Add to recent searches
+      setRecentSearches(prev => {
+        const newSearch = { type: mode, value: input.trim(), timestamp: new Date() };
+        const filtered = prev.filter(s => s.value !== input.trim());
+        return [newSearch, ...filtered].slice(0, 5);
+      });
+      
+    } catch (err) {
+      setError('No complaints found. Please check your input and try again.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const clearSearch = () => {
+    setInput('');
+    setResults(null);
+    setError('');
+  };
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Track Your Complaint</h1>
-
-      {/* Mode toggle */}
-      <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm">
-        <button
-          onClick={() => { setMode('phone'); setResults(null); setInput('') }}
-          className={`flex-1 py-2 font-medium transition ${mode === 'phone' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-        >
-          By Phone Number
-        </button>
-        <button
-          onClick={() => { setMode('id'); setResults(null); setInput('') }}
-          className={`flex-1 py-2 font-medium 
-transition ${mode === 'id' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-        >
-          By Complaint ID
-        </button>
-      </div>
-
-      {/* Search form */}
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => { setInput(e.target.value); setError('') }}
-          placeholder={mode === 'phone' ? 'Enter 10-digit phone number' : 'Enter Complaint ID (e.g. CMP_874123)'}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
-        >
-          Search
-        </button>
-      </form>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      {loading && <LoadingSpinner />}
-
-      {/* Results */}
-      {results && results.length === 0 && (
-        <p className="text-gray-400 text-sm text-center py-6">No complaints found.</p>
-      )}
-
-      {results && results.length > 0 && (
-        <div className="space-y-3">
-          {results.map((c) => (
-            <div key={c.complaint_id} className="bg-white rounded-xl shadow p-4 space-y-2">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <span className="font-mono text-sm font-bold text-blue-700">{c.complaint_id}</span>
-                <StatusBadge status={c.status} />
-              </div>
-              <p className="text-sm font-medium text-gray-700">{c.category}</p>
-              {c.description && <p className="text-sm text-gray-500 truncate">{c.description}</p>}
-              <p className="text-xs text-gray-400">Reported: {formatDate(c.created_at)}</p>
-              <Link
-                to={`/issue/${c.complaint_id}`}
-                className="text-xs text-blue-600 hover:underline"
-              >
-                View full details →
-              </Link>
-            </div>
-          ))}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <Link 
+            to="/" 
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 group"
+          >
+            <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span>
+            Back to Home
+          </Link>
+          
+          <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg mb-4">
+            <span className="text-white text-3xl">🔍</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Track Your Complaint</h1>
+          <p className="text-gray-600">Enter your phone number or complaint ID to check status</p>
         </div>
-      )}
+
+        {/* Main Card */}
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {/* Mode Toggle */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-1">
+            <div className="flex rounded-xl bg-white p-1 shadow-inner">
+              <button
+                onClick={() => { setMode('phone'); setResults(null); setInput(''); setError(''); }}
+                className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  mode === 'phone' 
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="mr-2">📱</span>
+                By Phone Number
+              </button>
+              <button
+                onClick={() => { setMode('id'); setResults(null); setInput(''); setError(''); }}
+                className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  mode === 'id' 
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="mr-2">🆔</span>
+                By Complaint ID
+              </button>
+            </div>
+          </div>
+
+          {/* Search Form */}
+          <div className="p-6">
+            <form onSubmit={handleSearch} className="space-y-4">
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl blur opacity-0 group-hover:opacity-75 transition duration-300"></div>
+                <div className="relative flex">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => { setInput(e.target.value); setError(''); }}
+                    placeholder={mode === 'phone' 
+                      ? "Enter 10-digit phone number" 
+                      : "Enter Complaint ID (e.g., CMP_874123)"
+                    }
+                    className="flex-1 px-6 py-4 border-2 border-gray-200 rounded-l-xl focus:outline-none focus:border-blue-500 transition-all duration-300 text-lg"
+                  />
+                  <button
+                    type="submit"
+                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-r-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center space-x-2"
+                  >
+                    <span>Search</span>
+                    <span className="text-xl">→</span>
+                  </button>
+                </div>
+              </div>
+
+              {input && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
+                >
+                  <span className="mr-1">✕</span>
+                  Clear search
+                </button>
+              )}
+
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <span className="text-red-500 mr-3">⚠️</span>
+                    <p className="text-red-700 text-sm">{error}</p>
+                  </div>
+                </div>
+              )}
+            </form>
+
+            {/* Recent Searches */}
+            {recentSearches.length > 0 && !results && (
+              <div className="mt-6">
+                <p className="text-xs text-gray-500 mb-2">Recent Searches</p>
+                <div className="flex flex-wrap gap-2">
+                  {recentSearches.map((search, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setInput(search.value);
+                        setMode(search.type);
+                      }}
+                      className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-600 transition-colors duration-300 flex items-center"
+                    >
+                      <span className="mr-1">{search.type === 'phone' ? '📱' : '🆔'}</span>
+                      {search.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Loading State */}
+        {loading && <LoadingSpinner />}
+
+        {/* Results Section */}
+        {results && results.length > 0 && (
+          <div className="mt-8 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Found {results.length} {results.length === 1 ? 'Complaint' : 'Complaints'}
+              </h2>
+              <button
+                onClick={() => setResults(null)}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Hide Results
+              </button>
+            </div>
+
+            {results.map((complaint, index) => (
+              <div
+                key={complaint.complaint_id}
+                className="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              >
+                {/* Priority Indicator */}
+                <div className={`absolute top-0 left-0 w-1 h-full ${
+                  complaint.priority === 'High' ? 'bg-red-500' :
+                  complaint.priority === 'Medium' ? 'bg-yellow-500' : 'bg-green-500'
+                }`}></div>
+
+                <div className="p-6">
+                  {/* Header */}
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${
+                        complaint.priority === 'High' ? 'bg-red-100' :
+                        complaint.priority === 'Medium' ? 'bg-yellow-100' : 'bg-green-100'
+                      }`}>
+                        {complaint.category.includes('Light') ? '💡' :
+                         complaint.category.includes('Garbage') ? '🗑️' : '📋'}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">{complaint.category}</h3>
+                        <div className="flex items-center space-x-2 text-sm">
+                          <span className="font-mono text-blue-600 font-medium">{complaint.complaint_id}</span>
+                          <span className="text-gray-300">•</span>
+                          <span className="text-gray-500">{complaint.area || 'Location not specified'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <StatusBadge status={complaint.status} />
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-gray-600 mb-4 line-clamp-2">{complaint.description}</p>
+
+                  {/* Details Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-xs text-gray-500 mb-1">Reported Date</p>
+                      <p className="text-sm font-medium text-gray-800">{formatDate(complaint.created_at)}</p>
+                    </div>
+                    
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-xs text-gray-500 mb-1">Priority</p>
+                      <p className={`text-sm font-medium ${
+                        complaint.priority === 'High' ? 'text-red-600' :
+                        complaint.priority === 'Medium' ? 'text-yellow-600' : 'text-green-600'
+                      }`}>
+                        {complaint.priority}
+                      </p>
+                    </div>
+
+                    {complaint.expected_resolution && (
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <p className="text-xs text-gray-500 mb-1">Expected Resolution</p>
+                        <p className="text-sm font-medium text-gray-800">{formatDate(complaint.expected_resolution)}</p>
+                      </div>
+                    )}
+
+                    {complaint.name && (
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <p className="text-xs text-gray-500 mb-1">Reported By</p>
+                        <p className="text-sm font-medium text-gray-800">{complaint.name}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Progress Bar for In Progress complaints */}
+                  {complaint.status === 'In Progress' && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                        <span>Progress</span>
+                        <span>65%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full" style={{ width: '65%' }}></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
+                    <Link
+                      to={`/issue/${complaint.complaint_id}`}
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 text-center"
+                    >
+                      View Full Details
+                    </Link>
+                    
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(complaint.complaint_id);
+                        alert('Complaint ID copied to clipboard!');
+                      }}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all duration-300 flex items-center"
+                    >
+                      <span className="mr-2">📋</span>
+                      Copy ID
+                    </button>
+
+                    <button
+                      onClick={() => window.open(`https://wa.me/?text=Check%20my%20complaint%20status:%20${complaint.complaint_id}`, '_blank')}
+                      className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-all duration-300 flex items-center"
+                    >
+                      <span className="mr-2">📱</span>
+                      Share
+                    </button>
+                  </div>
+
+                  {/* Timeline Preview */}
+                  <div className="mt-4 flex items-center space-x-4 text-xs text-gray-500">
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                      Reported
+                    </div>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+                      Assigned
+                    </div>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>
+                      In Progress
+                    </div>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-gray-300 rounded-full mr-1"></span>
+                      Resolution
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* No Results State */}
+        {results && results.length === 0 && (
+          <div className="mt-8 bg-white rounded-2xl shadow-xl p-12 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-4xl">🔍</span>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Complaints Found</h3>
+            <p className="text-gray-500 mb-6">We couldn't find any complaints matching your search.</p>
+            <button
+              onClick={clearSearch}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+            >
+              Try Another Search
+            </button>
+          </div>
+        )}
+
+        {/* Help Section */}
+        <div className="mt-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl">
+                ❓
+              </div>
+              <div>
+                <h3 className="font-semibold mb-1">Need Help Tracking?</h3>
+                <p className="text-sm text-blue-100">Check your complaint ID from the email/SMS you received</p>
+              </div>
+            </div>
+            <button
+              onClick={() => window.location.href = 'mailto:support@civicfix.com'}
+              className="px-6 py-2 bg-white text-blue-600 rounded-lg font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+            >
+              Contact Support
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Tips */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white/80 backdrop-blur rounded-xl p-4 text-center">
+            <span className="text-2xl mb-2 block">📱</span>
+            <h4 className="font-medium text-gray-800 mb-1">Phone Number</h4>
+            <p className="text-xs text-gray-500">Use the number you registered with</p>
+          </div>
+          <div className="bg-white/80 backdrop-blur rounded-xl p-4 text-center">
+            <span className="text-2xl mb-2 block">🆔</span>
+            <h4 className="font-medium text-gray-800 mb-1">Complaint ID</h4>
+            <p className="text-xs text-gray-500">Format: CMP_ followed by 6 digits</p>
+          </div>
+          <div className="bg-white/80 backdrop-blur rounded-xl p-4 text-center">
+            <span className="text-2xl mb-2 block">⏱️</span>
+            <h4 className="font-medium text-gray-800 mb-1">24/7 Tracking</h4>
+            <p className="text-xs text-gray-500">Check status anytime, anywhere</p>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
