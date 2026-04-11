@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getComplaints, upvoteComplaint, addComment } from '../api/complaintApi';
+import toast from 'react-hot-toast';
 
 export default function SeeProblemsPage() {
   const [complaints, setComplaints] = useState([]);
@@ -49,8 +50,9 @@ export default function SeeProblemsPage() {
       setComplaints(prev => prev.map(c => 
         c.complaint_id === id ? { ...c, upvotes: (c.upvotes || 0) + 1 } : c
       ));
+      toast.success("Complaint priority increased!");
     } catch (err) {
-      alert("Failed to upvote");
+      toast.error("Failed to upvote");
     }
   };
 
@@ -63,8 +65,9 @@ export default function SeeProblemsPage() {
       ));
       setNewComment('');
       setCommentingId(null);
+      toast.success("Comment added to discussion!");
     } catch (err) {
-      alert("Failed to add comment");
+      toast.error("Failed to add comment");
     }
   };
 

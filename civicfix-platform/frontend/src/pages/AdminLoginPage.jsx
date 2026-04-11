@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { adminLogin } from "../api/authApi"
 import { useAdmin } from "../context/AdminContext"
+import toast from "react-hot-toast"
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("")
@@ -34,7 +35,7 @@ export default function AdminLoginPage() {
         navigate("/admin")
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Invalid credentials")
+      toast.error(err.response?.data?.message || "Invalid credentials")
     } finally {
       setIsLoading(false)
     }
@@ -181,7 +182,7 @@ Remember me
 
 <button
 type="button"
-onClick={()=>alert("Please contact system administrator")}
+onClick={()=>toast("Please contact system administrator", { icon: "ℹ️" })}
 className="text-sm text-blue-200 hover:text-white transition"
 >
 Forgot password?
@@ -221,7 +222,7 @@ isLoading?"opacity-75 cursor-not-allowed":"hover:-translate-y-0.5"
 <p className="text-sm text-blue-200/70">
 Need help? Contact{" "}
 <button
-onClick={()=>alert("Support: admin@civicfix.com")}
+onClick={()=>toast("Support: admin@civicfix.com", { icon: "ℹ️" })}
 className="text-blue-300 hover:text-white transition"
 >
 system administrator

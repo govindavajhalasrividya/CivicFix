@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { getComplaints, updateStatus, assignWorker } from "../api/complaintApi";
 import { getWorkers } from "../api/workerApi";
 import { X, ExternalLink, User, Calendar, MapPin, Tag, Flag, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import toast from "react-hot-toast";
 
 // Helper component for professional status badges
 const StatusBadge = ({ status }) => {
@@ -80,9 +81,10 @@ export default function AdminDashboard() {
       if (selectedComplaint && selectedComplaint.complaint_id === id) {
         setSelectedComplaint({ ...selectedComplaint, status: newStatus });
       }
+      toast.success("Status updated!");
       fetchData();
     } catch (err) {
-      alert("Failed to update status");
+      toast.error("Failed to update status");
     }
   };
 
@@ -94,9 +96,10 @@ export default function AdminDashboard() {
       if (selectedComplaint && selectedComplaint.complaint_id === id) {
         setSelectedComplaint({ ...selectedComplaint, assigned_worker_id: workerId });
       }
+      toast.success("Worker assigned!");
       fetchData();
     } catch (err) {
-      alert("Failed to assign worker");
+      toast.error("Failed to assign worker");
     }
   };
 
@@ -481,7 +484,7 @@ export default function AdminDashboard() {
               </button>
               <button 
                 onClick={() => {
-                  alert(`Direct contact with ${selectedComplaint.name} initiated via platform messaging.`);
+                  toast.success(`Direct contact with ${selectedComplaint.name} initiated via platform messaging.`);
                 }}
                 className="px-8 py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition-all duration-300 shadow-xl"
               >

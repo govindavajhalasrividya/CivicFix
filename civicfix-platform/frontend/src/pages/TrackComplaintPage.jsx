@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { trackByPhone, getComplaintById, upvoteComplaint, addComment } from '../api/complaintApi';
+import toast from 'react-hot-toast';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -84,8 +85,9 @@ export default function TrackComplaintPage() {
       setResults(prev => prev.map(c => 
         c.complaint_id === id ? { ...c, upvotes: (c.upvotes || 0) + 1 } : c
       ));
+      toast.success("Complaint upvoted!");
     } catch (err) {
-      alert("Failed to upvote. Please try again.");
+      toast.error("Failed to upvote. Please try again.");
     }
   };
 
@@ -98,8 +100,9 @@ export default function TrackComplaintPage() {
       ));
       setCommentText('');
       setActiveCommentId(null);
+      toast.success("Comment added!");
     } catch (err) {
-      alert("Failed to add comment.");
+      toast.error("Failed to add comment.");
     }
   };
 
