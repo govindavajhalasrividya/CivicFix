@@ -96,6 +96,26 @@ const uploadResolution = async (req, res) => {
   }
 };
 
+// POST /api/v1/complaints/:complaint_id/upvote
+const upvoteComplaint = async (req, res) => {
+  try {
+    const data = await complaintService.upvoteComplaint(req.params.complaint_id);
+    return successResponse(res, 'Complaint upvoted', data);
+  } catch (err) {
+    return errorResponse(res, err.message, err.code || 'ERROR', err.status || 500);
+  }
+};
+
+// POST /api/v1/complaints/:complaint_id/comment
+const addComment = async (req, res) => {
+  try {
+    const data = await complaintService.addComment(req.params.complaint_id, req.body);
+    return successResponse(res, 'Comment added', data);
+  } catch (err) {
+    return errorResponse(res, err.message, err.code || 'ERROR', err.status || 500);
+  }
+};
+
 module.exports = {
   createComplaint,
   checkDuplicate,
@@ -106,4 +126,6 @@ module.exports = {
   updateStatus,
   assignWorker,
   uploadResolution,
+  upvoteComplaint,
+  addComment,
 };

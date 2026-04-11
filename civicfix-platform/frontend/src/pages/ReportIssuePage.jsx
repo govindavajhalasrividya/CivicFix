@@ -59,26 +59,7 @@ const useLocation = () => {
   return { location, error, loading };
 };
 
-// Mock API functions
-const createComplaint = (data) => {
-  return Promise.resolve({
-    data: {
-      data: {
-        complaint_id: 'CMP_' + Math.floor(Math.random() * 1000000),
-        ...data
-      }
-    }
-  });
-};
-
-const checkDuplicate = (data) => {
-  return Promise.resolve({
-    data: {
-      duplicate_found: false,
-      existing_complaints: []
-    }
-  });
-};
+import { createComplaint, checkDuplicate } from "../api/complaintApi";
 
 const INITIAL_FORM = {
   name: "",
@@ -86,6 +67,7 @@ const INITIAL_FORM = {
   email: "",
   category: "",
   description: "",
+  address: "",
 };
 
 export default function ReportIssuePage() {
@@ -177,6 +159,7 @@ export default function ReportIssuePage() {
     if (!/^\d{10}$/.test(form.phone_number)) return "Phone number must be 10 digits.";
     if (!form.category) return "Please select a category.";
     if (!form.description.trim()) return "Description is required.";
+    if (!form.address.trim()) return "A reference address is required to help our team locate the issue.";
     if (!imageUrl) return "Please upload an image.";
     if (!selectedLocation) return "Please select a location on the map.";
     return null;
@@ -349,11 +332,11 @@ export default function ReportIssuePage() {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg mb-4">
+          <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg mb-6">
             <span className="text-white text-3xl">📝</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Report an Issue</h1>
-          <p className="text-gray-600">Help us make your city better by reporting civic problems</p>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-800 mb-2">Report an Issue</h1>
+          <p className="text-base text-gray-600">Help us make your city better by reporting civic problems</p>
         </div>
 
         {/* Progress Steps */}
@@ -362,7 +345,7 @@ export default function ReportIssuePage() {
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center flex-1">
                 <div className="relative">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl transition-all duration-300 ${
                     currentStep >= step 
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
                       : 'bg-gray-200 text-gray-500'
@@ -378,7 +361,7 @@ export default function ReportIssuePage() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-500">
+          <div className="flex justify-between mt-3 text-lg font-bold text-gray-600">
             <span>Location</span>
             <span>Evidence</span>
             <span>Details</span>
@@ -546,7 +529,7 @@ export default function ReportIssuePage() {
               <div className="space-y-4">
                 {/* Category Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {categories.map((cat) => (
                       <label
@@ -566,15 +549,15 @@ export default function ReportIssuePage() {
                           className="hidden"
                         />
                         <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{cat.icon}</span>
+                          <span className="text-3xl">{cat.icon}</span>
                           <div>
-                            <p className="font-medium text-gray-800">{cat.name}</p>
+                            <p className="font-bold text-base text-gray-800">{cat.name}</p>
                             <p className="text-xs text-gray-500">{cat.description}</p>
                           </div>
                         </div>
                         {form.category === cat.id && (
-                          <div className="absolute top-2 right-2 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✓</span>
+                          <div className="absolute top-2 right-2 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
+                            <span className="text-white text-[10px]">✓</span>
                           </div>
                         )}
                       </label>
@@ -584,52 +567,65 @@ export default function ReportIssuePage() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
                   <textarea
                     name="description"
                     value={form.description}
                     onChange={handleChange}
-                    rows="4"
+                    rows="3"
                     placeholder="Describe the issue in detail..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                  ></textarea>
+                </div>
+
+                {/* Address */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Detailed Address / Location Reference *</label>
+                  <textarea
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    rows="2"
+                    placeholder="E.g. Near Star Bakery, MG Road, Sector 3..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
                   ></textarea>
                 </div>
 
                 {/* Personal Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
                     <input
                       type="text"
                       name="name"
                       value={form.name}
                       onChange={handleChange}
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
                     <input
                       type="tel"
                       name="phone_number"
                       value={form.phone_number}
                       onChange={handleChange}
                       placeholder="10-digit mobile number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email (Optional)</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Email (Optional)</label>
                     <input
                       type="email"
                       name="email"
                       value={form.email}
                       onChange={handleChange}
                       placeholder="Enter your email address"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
                     />
                   </div>
                 </div>

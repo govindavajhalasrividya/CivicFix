@@ -2,53 +2,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// Mock API functions (replace with actual imports)
-const trackByPhone = (phone) => {
-  return Promise.resolve({
-    data: {
-      data: [
-        {
-          complaint_id: 'CMP_874123',
-          category: 'Street Light Malfunction',
-          status: 'In Progress',
-          description: 'Street light not working for the past 3 days',
-          created_at: '2024-03-15T10:30:00Z',
-          area: 'Sector 5',
-          priority: 'High'
-        },
-        {
-          complaint_id: 'CMP_874456',
-          category: 'Garbage Collection',
-          status: 'Pending',
-          description: 'Garbage not collected for a week',
-          created_at: '2024-03-14T14:20:00Z',
-          area: 'Sector 8',
-          priority: 'Medium'
-        }
-      ]
-    }
-  });
-};
-
-const getComplaintById = (id) => {
-  return Promise.resolve({
-    data: {
-      data: {
-        complaint_id: id || 'CMP_874123',
-        category: 'Street Light Malfunction',
-        status: 'In Progress',
-        description: 'Street light not working for the past 3 days. Area is completely dark at night.',
-        created_at: '2024-03-15T10:30:00Z',
-        area: 'Sector 5',
-        priority: 'High',
-        name: 'Rahul Sharma',
-        phone_number: '+91 98765 43210',
-        address: '123, Main Street, Sector 5',
-        expected_resolution: '2024-03-18T00:00:00Z'
-      }
-    }
-  });
-};
+import { trackByPhone, getComplaintById, upvoteComplaint, addComment } from '../api/complaintApi';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -120,6 +74,34 @@ export default function TrackComplaintPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
+  const [activeCommentId, setActiveCommentId] = useState(null);
+  const [commentText, setCommentText] = useState('');
+  const [commentUserName, setCommentUserName] = useState('');
+
+  const handleUpvote = async (id) => {
+    try {
+      await upvoteComplaint(id);
+      setResults(prev => prev.map(c => 
+        c.complaint_id === id ? { ...c, upvotes: (c.upvotes || 0) + 1 } : c
+      ));
+    } catch (err) {
+      alert("Failed to upvote. Please try again.");
+    }
+  };
+
+  const handleAddComment = async (id) => {
+    if (!commentText.trim()) return;
+    try {
+      const res = await addComment(id, { text: commentText, user_name: commentUserName || 'Anonymous' });
+      setResults(prev => prev.map(c => 
+        c.complaint_id === id ? { ...c, comments: [...(c.comments || []), { text: commentText, user_name: commentUserName || 'Anonymous', created_at: new Date() }] } : c
+      ));
+      setCommentText('');
+      setActiveCommentId(null);
+    } catch (err) {
+      alert("Failed to add comment.");
+    }
+  };
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -180,11 +162,11 @@ export default function TrackComplaintPage() {
             Back to Home
           </Link>
           
-          <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg mb-4">
+          <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg mb-6">
             <span className="text-white text-3xl">🔍</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Track Your Complaint</h1>
-          <p className="text-gray-600">Enter your phone number or complaint ID to check status</p>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-800 mb-2">Track Your Complaint</h1>
+          <p className="text-base text-gray-600">Enter your phone number or complaint ID to check status</p>
         </div>
 
         {/* Main Card */}
@@ -231,15 +213,15 @@ export default function TrackComplaintPage() {
                       ? "Enter 10-digit phone number" 
                       : "Enter Complaint ID (e.g., CMP_874123)"
                     }
-                    className="flex-1 px-6 py-4 border-2 border-gray-200 rounded-l-xl focus:outline-none focus:border-blue-500 transition-all duration-300 text-lg"
+                    className="flex-1 px-8 py-4 border-2 border-gray-200 rounded-l-2xl focus:outline-none focus:border-blue-500 transition-all duration-300 text-lg font-medium"
                   />
-                  <button
-                    type="submit"
-                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-r-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center space-x-2"
-                  >
-                    <span>Search</span>
-                    <span className="text-xl">→</span>
-                  </button>
+                    <button
+                      type="submit"
+                      className="px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-base rounded-r-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center space-x-3"
+                    >
+                      <span>Search</span>
+                      <span className="text-xl">→</span>
+                    </button>
                 </div>
               </div>
 
@@ -318,10 +300,9 @@ export default function TrackComplaintPage() {
                 }`}></div>
 
                 <div className="p-6">
-                  {/* Header */}
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${
+                    <div className="flex items-center space-x-6">
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-md ${
                         complaint.priority === 'High' ? 'bg-red-100' :
                         complaint.priority === 'Medium' ? 'bg-yellow-100' : 'bg-green-100'
                       }`}>
@@ -329,11 +310,11 @@ export default function TrackComplaintPage() {
                          complaint.category.includes('Garbage') ? '🗑️' : '📋'}
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-800">{complaint.category}</h3>
-                        <div className="flex items-center space-x-2 text-sm">
-                          <span className="font-mono text-blue-600 font-medium">{complaint.complaint_id}</span>
+                        <h3 className="text-2xl font-black text-gray-900 leading-tight">{complaint.category}</h3>
+                        <div className="flex items-center space-x-2 text-base">
+                          <span className="font-mono text-blue-600 font-bold">#{complaint.complaint_id}</span>
                           <span className="text-gray-300">•</span>
-                          <span className="text-gray-500">{complaint.area || 'Location not specified'}</span>
+                          <span className="text-gray-600 font-medium">{complaint.address || 'Location not specified'}</span>
                         </div>
                       </div>
                     </div>
@@ -390,32 +371,76 @@ export default function TrackComplaintPage() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
-                    <Link
-                      to={`/issue/${complaint.complaint_id}`}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 text-center"
+                    <button
+                      onClick={() => handleUpvote(complaint.complaint_id)}
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 text-center flex items-center justify-center"
                     >
-                      View Full Details
-                    </Link>
+                      <span className="mr-2">👍</span>
+                      Upvote ({complaint.upvotes || 0})
+                    </button>
                     
                     <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(complaint.complaint_id);
-                        alert('Complaint ID copied to clipboard!');
-                      }}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all duration-300 flex items-center"
+                      onClick={() => setActiveCommentId(activeCommentId === complaint.complaint_id ? null : complaint.complaint_id)}
+                      className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all duration-300 flex items-center justify-center"
                     >
-                      <span className="mr-2">📋</span>
-                      Copy ID
+                      <span className="mr-2">💬</span>
+                      Comment ({complaint.comments?.length || 0})
                     </button>
-
-                    <button
-                      onClick={() => window.open(`https://wa.me/?text=Check%20my%20complaint%20status:%20${complaint.complaint_id}`, '_blank')}
-                      className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-all duration-300 flex items-center"
+                    
+                    <Link
+                      to={`/issue/${complaint.complaint_id}`}
+                      className="px-4 py-2 border-2 border-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all duration-300 text-center"
                     >
-                      <span className="mr-2">📱</span>
-                      Share
-                    </button>
+                      Details
+                    </Link>
                   </div>
+
+                  {/* Comment Section (Expandable) */}
+                  {activeCommentId === complaint.complaint_id && (
+                    <div className="mt-6 pt-6 border-t border-gray-100 animate-slideDown">
+                      <div className="space-y-3 mb-4 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                        {complaint.comments?.length > 0 ? (
+                          complaint.comments.map((comment, idx) => (
+                            <div key={idx} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-blue-600 text-[10px] font-bold uppercase">{comment.user_name}</p>
+                                <p className="text-gray-400 text-[9px]">{new Date(comment.created_at).toLocaleDateString()}</p>
+                              </div>
+                              <p className="text-gray-700 text-xs">{comment.text}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-400 text-xs text-center py-2 italic">No comments yet.</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <input 
+                          type="text" 
+                          placeholder="Your name (optional)"
+                          value={commentUserName}
+                          onChange={(e) => setCommentUserName(e.target.value)}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 transition-colors"
+                        />
+                        <div className="flex space-x-2">
+                          <input 
+                            type="text" 
+                            placeholder="Write a comment..."
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleAddComment(complaint.complaint_id)}
+                            className="flex-grow bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                          />
+                          <button 
+                            onClick={() => handleAddComment(complaint.complaint_id)}
+                            className="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg font-bold text-sm transition-all duration-300"
+                          >
+                            Post
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Timeline Preview */}
                   <div className="mt-4 flex items-center space-x-4 text-xs text-gray-500">
@@ -499,6 +524,30 @@ export default function TrackComplaintPage() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.2);
+        }
+      `}</style>
     </div>
   );
 }

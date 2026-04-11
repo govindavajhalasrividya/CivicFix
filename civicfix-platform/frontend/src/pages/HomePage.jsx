@@ -122,28 +122,28 @@ export default function HomePage() {
           
 
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Transform Your City
               </span>
               <br />
-              <span className="text-gray-800">One Report at a Time</span>
+              <span className="text-gray-900">One Report at a Time</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 mb-10 max-w-3xl mx-auto font-medium">
               Join thousands of citizens making their neighborhoods better. 
               Report issues instantly, track progress, and celebrate solutions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/report"
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group"
+                className="px-10 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1.5 transition-all duration-300 flex items-center justify-center group"
               >
-                <span>Report an Issue</span>
-                <span className="ml-2 group-hover:translate-x-1 transition">→</span>
+                <span>Report an Issue Now</span>
+                <span className="ml-3 text-xl group-hover:translate-x-2 transition">→</span>
               </Link>
               <Link
                 to="/track"
-                className="px-8 py-4 bg-white text-gray-800 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-gray-200"
+                className="px-10 py-5 bg-white text-gray-800 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1.5 transition-all duration-300 border border-gray-200"
               >
                 Track Complaint
               </Link>
@@ -169,11 +169,11 @@ export default function HomePage() {
             >
               <div className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
               <div className="relative">
-                <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 text-3xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-20 h-20 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 text-4xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">{feature.title}</h3>
+                <p className="text-gray-600 text-lg leading-relaxed">{feature.description}</p>
               </div>
             </div>
           ))}
@@ -275,50 +275,62 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
+      <footer className="bg-slate-900 text-slate-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
                   <span className="text-white text-lg">🏛️</span>
                 </div>
-                <span className="text-xl font-bold">CivicFix</span>
+                <span className="text-xl font-black text-white tracking-tight">CivicFix</span>
               </div>
-              <p className="text-gray-400 text-sm">Making cities better through citizen engagement.</p>
+              <p className="text-sm leading-relaxed max-w-xs">
+                Empowering citizens to build better cities through transparent reporting and community collaboration.
+              </p>
             </div>
+            
             <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link to="/report" className="hover:text-white transition">Report Issue</Link></li>
-                <li><Link to="/track" className="hover:text-white transition">Track Complaint</Link></li>
-                <li><Link to="/admin/login" className="hover:text-white transition">Admin Login</Link></li>
+              <h4 className="text-white font-bold mb-6">Quick Access</h4>
+              <ul className="space-y-4 text-sm">
+                <li><Link to="/report" className="hover:text-white transition-colors">Report an Issue</Link></li>
+                <li><Link to="/track" className="hover:text-white transition-colors">Track Complaint</Link></li>
+                <li><Link to="/problems" className="hover:text-white transition-colors">Community Bulletin</Link></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">How it Works</a></li>
-                <li><a href="#" className="hover:text-white transition">FAQ</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact Support</a></li>
+              <h4 className="text-white font-bold mb-6">Support</h4>
+              <ul className="space-y-4 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Safety Guidelines</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact Support</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
+              <h4 className="text-white font-bold mb-6">Admin</h4>
+              <ul className="space-y-4 text-sm">
+                <li><Link to="/admin/login" className="hover:text-white transition-colors">Administrator Login</Link></li>
+                <li><a href="#" className="hover:text-white transition-colors">Employee Portal</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-            <p>© 2026 CivicFix – Smart Civic Reporting System. All rights reserved.</p>
+          
+          <div className="border-t border-slate-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs">
+              © 2026 CivicFix Platform. Government of the Community.
+            </p>
+            <div className="flex space-x-6 text-xs">
+              <a href="#" className="hover:text-white transition">Privacy Policy</a>
+              <a href="#" className="hover:text-white transition">Terms of Service</a>
+            </div>
           </div>
         </div>
       </footer>
 
       {/* Add animation keyframes */}
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

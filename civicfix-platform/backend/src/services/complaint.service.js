@@ -42,7 +42,7 @@ const createComplaint = async (payload) => {
   const validationError = validateCreatePayload(payload);
   if (validationError) throw makeError(validationError, 'INVALID_REQUEST', 400);
 
-  const { name, phone_number, email, category, description, image_url, latitude, longitude } = payload;
+  const { name, phone_number, email, category, description, address, image_url, latitude, longitude } = payload;
 
   // Generate unique complaint_id (retry on collision)
   let complaint_id;
@@ -61,6 +61,7 @@ const createComplaint = async (payload) => {
     email: email || null,
     category,
     description: description.trim(),
+    address: address ? address.trim() : null,
     image_url,
     latitude,
     longitude,
@@ -135,6 +136,22 @@ const uploadResolution = async (complaint_id, resolution_image_url) => {
   return updated;
 };
 
+const upvoteComplaint = async (complaint_id) => {
+  const updated = await repo.upvoteComplaint(complaint_id);
+  if (!updated) throw makeError('Complaint not found.', 'COMPLAINT_NOT_FOUND', 404);
+  return updated;
+};
+
+const addComment = async (complaint_id, { text, user_name }) => {
+  if (!text || !text.trim()) throw makeError('Comment text is required.', 'INVALID_REQUEST', 400);
+  const updated = await repo.addCommentToComplaint(complaint_id, {
+    text: text.trim(),
+    user_name: user_name || 'Anonymous',
+  });
+  if (!updated) throw makeError('Complaint not found.', 'COMPLAINT_NOT_FOUND', 404);
+  return updated;
+};
+
 // ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
@@ -149,4 +166,6 @@ module.exports = {
   updateStatus,
   assignWorker,
   uploadResolution,
+  upvoteComplaint,
+  addComment,
 };

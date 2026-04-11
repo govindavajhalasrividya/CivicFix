@@ -108,6 +108,28 @@ const setResolutionImage = async (complaint_id, resolution_image_url) => {
   );
 };
 
+/**
+ * Increment upvotes for a complaint.
+ */
+const upvoteComplaint = async (complaint_id) => {
+  return Complaint.findOneAndUpdate(
+    { complaint_id },
+    { $inc: { upvotes: 1 } },
+    { new: true }
+  );
+};
+
+/**
+ * Add a comment to a complaint.
+ */
+const addCommentToComplaint = async (complaint_id, commentData) => {
+  return Complaint.findOneAndUpdate(
+    { complaint_id },
+    { $push: { comments: commentData } },
+    { new: true }
+  );
+};
+
 module.exports = {
   insertComplaint,
   findNearbyComplaints,
@@ -118,4 +140,6 @@ module.exports = {
   updateComplaintStatus,
   assignWorkerToComplaint,
   setResolutionImage,
+  upvoteComplaint,
+  addCommentToComplaint,
 };

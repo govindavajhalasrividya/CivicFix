@@ -1,2 +1,18 @@
 venv
 node_modules
+
+# Environment variables (contains secrets — never commit these)
+.env
+.env.local
+.env.production
+
+# Build output
+dist
+build
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/

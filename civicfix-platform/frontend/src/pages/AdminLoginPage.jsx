@@ -1,38 +1,44 @@
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { adminLogin } from "../api/authApi"
+import { useAdmin } from "../context/AdminContext"
 
-export default function AdminLoginPage(){
-const[username,setUsername]=useState("")
-const[password,setPassword]=useState("")
-const[isLoading,setIsLoading]=useState(false)
-const[showPassword,setShowPassword]=useState(false)
-const[rememberMe,setRememberMe]=useState(false)
-const navigate=useNavigate()
-const[mousePosition,setMousePosition]=useState({x:0,y:0})
+export default function AdminLoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+  const navigate = useNavigate()
+  const { login } = useAdmin()
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
-useEffect(()=>{
-const handleMouseMove=e=>{
-setMousePosition({
-x:(e.clientX/window.innerWidth)*20,
-y:(e.clientY/window.innerHeight)*20
-})
-}
-window.addEventListener("mousemove",handleMouseMove)
-return()=>window.removeEventListener("mousemove",handleMouseMove)
-},[])
+  useEffect(() => {
+    const handleMouseMove = e => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth) * 20,
+        y: (e.clientY / window.innerHeight) * 20
+      })
+    }
+    window.addEventListener("mousemove", handleMouseMove)
+    return () => window.removeEventListener("mousemove", handleMouseMove)
+  }, [])
 
-const handleLogin=async e=>{
-e.preventDefault()
-setIsLoading(true)
-setTimeout(()=>{
-if(username==="admin"&&password==="admin123"){
-navigate("/admin")
-}else{
-alert("Invalid credentials")
-setIsLoading(false)
-}
-},1500)
-}
+  const handleLogin = async e => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const res = await adminLogin({ email, password })
+      if (res.data.success) {
+        login(res.data.data.access_token)
+        navigate("/admin")
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Invalid credentials")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
 const animationStyles=`
 @keyframes blob{
@@ -100,7 +106,7 @@ transform:`perspective(1000px) rotateX(${mousePosition.y*0.5}deg) rotateY(${mous
 
 <div className="space-y-2">
 <label className="block text-sm font-medium text-blue-100">
-Username
+Email Address
 </label>
 
 <div className="relative group">
@@ -110,15 +116,15 @@ Username
 <div className="relative">
 
 <input
-type="text"
-value={username}
-onChange={e=>setUsername(e.target.value)}
+type="email"
+value={email}
+onChange={e=>setEmail(e.target.value)}
 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-200/50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-placeholder="Enter your username"
+placeholder="Enter your email"
 required
 />
 
-<span className="absolute right-3 top-3 text-blue-200/50">👤</span>
+<span className="absolute right-3 top-3 text-blue-200/50">✉️</span>
 
 </div>
 </div>

@@ -10,3 +10,5 @@ export const updateStatus = (id, status) => axiosClient.put(`/complaints/${id}/s
 export const assignWorker = (id, worker_id) => axiosClient.put(`/complaints/${id}/assign-worker`, { worker_id })
 export const uploadResolution = (id, resolution_image_url) =>
   axiosClient.put(`/complaints/${id}/resolution`, { resolution_image_url })
+export const upvoteComplaint = (id) => axiosClient.post(`/complaints/${id}/upvote`)
+export const addComment = (id, data) => axiosClient.post(`/complaints/${id}/comment`, data)

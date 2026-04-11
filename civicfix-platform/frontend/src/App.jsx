@@ -7,6 +7,7 @@ import IssueDetailsPage from './pages/IssueDetailsPage'
 import TrackComplaintPage from './pages/TrackComplaintPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import AdminDashboard from './pages/AdminDashboard'
+import SeeProblemsPage from './pages/SeeProblemsPage'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/track" element={<TrackComplaintPage />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/problems" element={<SeeProblemsPage />} />
           </Routes>
         </main>
       </BrowserRouter>

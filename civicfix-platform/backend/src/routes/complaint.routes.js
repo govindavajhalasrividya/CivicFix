@@ -10,6 +10,8 @@ const {
   updateStatus,
   assignWorker,
   uploadResolution,
+  upvoteComplaint,
+  addComment,
 } = require('../controllers/complaint.controller');
 const complaintRateLimiter = require('../middleware/rateLimiter');
 const protect = require('../middleware/auth');
@@ -46,5 +48,11 @@ router.put('/:complaint_id/assign-worker', protect, assignWorker);
 
 // PUT /api/v1/complaints/:complaint_id/resolution  — admin only
 router.put('/:complaint_id/resolution', protect, uploadResolution);
+
+// POST /api/v1/complaints/:complaint_id/upvote — public
+router.post('/:complaint_id/upvote', upvoteComplaint);
+
+// POST /api/v1/complaints/:complaint_id/comment — public
+router.post('/:complaint_id/comment', addComment);
 
 module.exports = router;

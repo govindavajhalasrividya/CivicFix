@@ -34,6 +34,11 @@ const complaintSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    address: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     image_url: {
       type: String,
       required: true,
@@ -68,6 +73,17 @@ const complaintSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    upvotes: {
+      type: Number,
+      default: 0,
+    },
+    comments: [
+      {
+        text: { type: String, required: true },
+        user_name: { type: String, default: 'Anonymous' },
+        created_at: { type: Date, default: Date.now },
+      },
+    ],
     resolution_image_url: {
       type: String,
       default: null,

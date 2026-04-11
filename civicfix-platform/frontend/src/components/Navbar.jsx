@@ -27,6 +27,7 @@ export default function Navbar() {
 
   const navLinks = [
     { path: '/', label: 'Home', icon: '🏠' },
+    { path: '/problems', label: 'See Problems', icon: '💡' },
     { path: '/report', label: 'Report Issue', icon: '📝' },
     { path: '/track', label: 'Track', icon: '🔍' },
   ]
@@ -52,18 +53,17 @@ export default function Navbar() {
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 ${
                 isScrolled 
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600' 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md' 
                   : 'bg-white/20 backdrop-blur'
               }`}>
                 <span className="text-white text-xl">🏛️</span>
               </div>
               <div>
-                <span className={`font-bold text-xl tracking-tight transition-colors duration-300 ${
-                  isScrolled ? 'text-gray-800' : 'text-white'
+                <span className={`font-black text-xl tracking-tight transition-colors duration-300 ${
+                  isScrolled ? 'text-gray-900' : 'text-white'
                 }`}>
                   CivicFix
                 </span>
-                
               </div>
             </Link>
 
@@ -73,14 +73,14 @@ export default function Navbar() {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 group ${
+                  className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 group ${
                     isScrolled 
                       ? isActivePath(link.path)
                         ? 'text-blue-600 bg-blue-50'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                       : isActivePath(link.path)
                         ? 'text-white bg-white/20'
-                        : 'text-white/90 hover:text-white hover:bg-white/10'
+                        : 'text-white hover:text-white hover:bg-white/10'
                   }`}
                 >
                   <span className="flex items-center space-x-2">
@@ -286,7 +286,7 @@ export default function Navbar() {
       <div className="h-16"></div>
 
       {/* Animation Styles */}
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
