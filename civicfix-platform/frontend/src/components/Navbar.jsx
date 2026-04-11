@@ -2,9 +2,11 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAdmin } from '../context/AdminContext'
+import { useTheme } from '../context/ThemeContext'
 
 export default function Navbar() {
   const { isAdmin, logout } = useAdmin()
+  const { isDarkMode, toggleTheme } = useTheme()
   const location = useLocation()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -98,6 +100,16 @@ export default function Navbar() {
 
             {/* Right Side - Admin & Profile */}
             <div className="hidden md:flex items-center space-x-3">
+              <button 
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg text-xl transition-all duration-300 ${
+                  isScrolled ? 'hover:bg-gray-100' : 'hover:bg-white/20'
+                }`}
+                title="Toggle Dark Mode"
+              >
+                {isDarkMode ? '🌞' : '🌙'}
+              </button>
+              
               {isAdmin ? (
                 <div className="relative">
                   <button
@@ -235,6 +247,15 @@ export default function Navbar() {
 
               {/* Divider */}
               <div className="border-t border-gray-100 my-2"></div>
+              
+              {/* Mobile Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center space-x-3 px-6 py-4 text-base text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <span className="text-2xl">{isDarkMode ? '🌞' : '🌙'}</span>
+                <span className="font-medium">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
 
               {/* Mobile Admin Section */}
               {isAdmin ? (

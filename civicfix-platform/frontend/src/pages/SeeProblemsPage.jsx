@@ -72,30 +72,30 @@ export default function SeeProblemsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20 pt-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 pt-10 transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header Section */}
         <div className="relative mb-12 text-center">
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-60 h-60 bg-blue-500/10 blur-[120px] rounded-full"></div>
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4 tracking-tight transition-colors duration-300">
             Community <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Bulletin</span>
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto font-medium transition-colors duration-300">
             Real-time updates on local community issues. Upvote to prioritize and collaborate on solutions.
           </p>
         </div>
 
         {/* Filters/Location Info */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4 px-2">
-          <div className="flex items-center space-x-3 bg-white border-2 border-gray-100 px-6 py-3 rounded-2xl shadow-sm">
+          <div className="flex items-center space-x-3 bg-white dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 px-6 py-3 rounded-2xl shadow-sm transition-colors duration-300">
             <span className="text-2xl text-blue-600">📍</span>
-            <span className="text-gray-800 text-lg font-bold">
+            <span className="text-gray-800 dark:text-white text-lg font-bold transition-colors duration-300">
               {userLocation ? "Nearby Reports" : "All local issues"}
             </span>
           </div>
           <button 
             onClick={fetchComplaints}
-            className="flex items-center space-x-3 bg-white border-2 border-gray-100 hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-2xl transition-all duration-300 shadow-sm font-bold text-lg transform hover:-translate-y-0.5 active:scale-95"
+            className="flex items-center space-x-3 bg-white dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 px-8 py-3 rounded-2xl transition-all duration-300 shadow-sm font-bold text-lg transform hover:-translate-y-0.5 active:scale-95"
           >
             <span className="text-xl">🔄</span>
             <span>Refresh Updates</span>
@@ -109,17 +109,17 @@ export default function SeeProblemsPage() {
             <p className="text-gray-500 font-medium">Updating community feed...</p>
           </div>
         ) : complaints.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-3xl p-12 text-center shadow-sm">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-12 text-center shadow-sm transition-colors duration-300">
             <div className="text-6xl mb-6">🏙️</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">No problems reported yet</h3>
-            <p className="text-gray-500">Your community feed is clear! Report an issue to help your neighborhood.</p>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2 transition-colors duration-300">No problems reported yet</h3>
+            <p className="text-gray-500 dark:text-gray-400">Your community feed is clear! Report an issue to help your neighborhood.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8">
             {complaints.map((item) => (
               <div 
                 key={item.complaint_id}
-                className="group bg-white border border-gray-200 rounded-3xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl shadow-sm"
+                className="group bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl overflow-hidden hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl shadow-sm"
               >
                 <div className="p-6 md:p-8">
                   <div className="flex flex-col md:flex-row gap-8">
@@ -130,7 +130,7 @@ export default function SeeProblemsPage() {
                         alt="Issue" 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
-                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-gray-800 shadow-sm border border-gray-100 uppercase tracking-wider">
+                      <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-gray-800 dark:text-gray-200 shadow-sm border border-gray-100 dark:border-slate-700 uppercase tracking-wider">
                         {item.category}
                       </div>
                     </div>
@@ -149,21 +149,21 @@ export default function SeeProblemsPage() {
                             </span>
                             <span className="text-gray-400 text-sm font-mono font-bold">#{item.complaint_id}</span>
                           </div>
-                          <h3 className="text-3xl font-black text-gray-900 leading-tight mb-4">
+                          <h3 className="text-3xl font-black text-gray-900 dark:text-white leading-tight mb-4 transition-colors duration-300">
                             {item.description}
                           </h3>
                         </div>
                       </div>
 
                       <div className="bg-blue-50/50 rounded-2xl p-6 mb-8 border-2 border-blue-100/50">
-                        <p className="text-gray-700 text-lg flex items-start font-medium">
+                        <p className="text-gray-700 dark:text-gray-200 text-lg flex items-start font-medium transition-colors duration-300">
                           <span className="mr-3 text-2xl">📍</span>
                           <span>{item.address || "Location specified via GPS"}</span>
                         </p>
                       </div>
 
-                      <p className="text-gray-500 text-xs mb-6 flex-grow">
-                        Reported by <span className="text-gray-800 font-bold">{item.name}</span> • {new Date(item.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
+                      <p className="text-gray-500 dark:text-gray-400 text-xs mb-6 flex-grow transition-colors duration-300">
+                        Reported by <span className="text-gray-800 dark:text-gray-200 font-bold transition-colors duration-300">{item.name}</span> • {new Date(item.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
                       </p>
 
                       {/* Actions */}
@@ -177,7 +177,7 @@ export default function SeeProblemsPage() {
                         </button>
                         <button 
                           onClick={() => setCommentingId(commentingId === item.complaint_id ? null : item.complaint_id)}
-                          className="flex-1 flex items-center justify-center space-x-2 bg-gray-50 hover:bg-white border border-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl transition-all duration-300 transform active:scale-95"
+                          className="flex-1 flex items-center justify-center space-x-2 bg-gray-50 dark:bg-slate-700 hover:bg-white dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 font-bold py-3.5 rounded-2xl transition-all duration-300 transform active:scale-95"
                         >
                           <span className="text-lg">💬</span>
                           <span>Discuss ({item.comments?.length || 0})</span>
@@ -188,16 +188,16 @@ export default function SeeProblemsPage() {
 
                   {/* Comment Section (Expandable) */}
                   {commentingId === item.complaint_id && (
-                    <div className="mt-8 pt-8 border-t border-gray-100 animate-slideDown">
+                    <div className="mt-8 pt-8 border-t border-gray-100 dark:border-slate-700 animate-slideDown">
                       <div className="space-y-4 mb-6 max-h-56 overflow-y-auto pr-3 custom-scrollbar">
                         {item.comments?.length > 0 ? (
                           item.comments.map((comment, idx) => (
-                            <div key={idx} className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                            <div key={idx} className="bg-gray-50 dark:bg-slate-700 rounded-2xl p-4 border border-gray-100 dark:border-slate-600 transition-colors duration-300">
                               <div className="flex items-center justify-between mb-2">
-                                <p className="text-blue-700 text-xs font-black uppercase">{comment.user_name}</p>
-                                <p className="text-gray-400 text-[10px]">{new Date(comment.created_at).toLocaleDateString()}</p>
+                                <p className="text-blue-700 dark:text-blue-400 text-xs font-black uppercase">{comment.user_name}</p>
+                                <p className="text-gray-400 dark:text-gray-500 text-[10px]">{new Date(comment.created_at).toLocaleDateString()}</p>
                               </div>
-                              <p className="text-gray-700 text-sm leading-relaxed">{comment.text}</p>
+                              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed transition-colors duration-300">{comment.text}</p>
                             </div>
                           ))
                         ) : (
@@ -208,13 +208,13 @@ export default function SeeProblemsPage() {
                         )}
                       </div>
 
-                      <div className="flex flex-col space-y-3 bg-gray-50 p-4 rounded-3xl border border-gray-100">
+                      <div className="flex flex-col space-y-3 bg-gray-50 dark:bg-slate-700 p-4 rounded-3xl border border-gray-100 dark:border-slate-600 transition-colors duration-300">
                         <input 
                           type="text" 
                           placeholder="Your name (optional)"
                           value={userName}
                           onChange={(e) => setUserName(e.target.value)}
-                          className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-gray-800 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                          className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-2 text-gray-800 dark:text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                         />
                         <div className="flex space-x-2">
                           <input 
@@ -223,11 +223,11 @@ export default function SeeProblemsPage() {
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleAddComment(item.complaint_id)}
-                            className="flex-grow bg-white border border-gray-200 rounded-2xl px-6 py-3.5 text-gray-800 focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
+                            className="flex-grow bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-2xl px-6 py-3.5 text-gray-800 dark:text-white focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
                           />
                           <button 
                             onClick={() => handleAddComment(item.complaint_id)}
-                            className="bg-gray-900 hover:bg-black text-white px-8 rounded-2xl font-bold transition-all duration-300 active:scale-95 shadow-md"
+                            className="bg-gray-900 dark:bg-gray-100 hover:bg-black dark:hover:bg-white text-white dark:text-gray-900 px-8 rounded-2xl font-bold transition-all duration-300 active:scale-95 shadow-md"
                           >
                             Post
                           </button>

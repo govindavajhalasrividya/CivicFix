@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-:root {
-  --sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --heading: 'Outfit', var(--sans);
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
@@ -37,11 +37,11 @@
 
 /* Leaflet Fixes */
 .leaflet-container {
-  font-family: var(--sans) !important;
+  font-family: var(--font-sans) !important;
 }
 
 .leaflet-popup-content-wrapper {
-  @apply rounded-xl shadow-xl border-0 !important;
+  @apply !rounded-xl !shadow-xl !border-0;
 }
 
 /* Custom Scrollbar */

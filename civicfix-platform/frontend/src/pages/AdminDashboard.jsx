@@ -1,10 +1,11 @@
 // AdminDashboard.jsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getComplaints, updateStatus, assignWorker } from "../api/complaintApi";
 import { getWorkers } from "../api/workerApi";
 import { X, ExternalLink, User, Calendar, MapPin, Tag, Flag, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import toast from "react-hot-toast";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 // Helper component for professional status badges
 const StatusBadge = ({ status }) => {
@@ -137,10 +138,28 @@ export default function AdminDashboard() {
 
   const filteredComplaints = getFilteredComplaints();
 
+  const categoryData = useMemo(() => {
+    const counts = {};
+    complaints.forEach(c => {
+      counts[c.category] = (counts[c.category] || 0) + 1;
+    });
+    return Object.keys(counts).map(k => ({ name: k, value: counts[k] }));
+  }, [complaints]);
+
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1'];
+
+  const statusData = useMemo(() => {
+    return [
+      { name: 'Reported', count: parseInt(stats[1].value, 10) },
+      { name: 'In Progress', count: parseInt(stats[2].value, 10) },
+      { name: 'Resolved', count: parseInt(stats[3].value, 10) },
+    ];
+  }, [stats]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center space-x-4">
@@ -148,10 +167,10 @@ export default function AdminDashboard() {
                 <span className="text-white text-3xl">🏛️</span>
               </div>
               <div>
-                <h1 className="text-2xl font-black bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-black bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   Admin Dashboard
                 </h1>
-                <p className="text-sm text-gray-500 font-medium tracking-tight">Manage and track civic complaints</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium tracking-tight">Manage and track civic complaints</p>
               </div>
             </div>
             
@@ -189,11 +208,51 @@ export default function AdminDashboard() {
           ))}
         </div>
 
+        {/* Analytics Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 transition-colors duration-300">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Issues by Category</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 transition-colors duration-300">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Status Overview</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={statusData} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={80} tick={{fill: '#4B5563', fontSize: 12}} />
+                  <RechartsTooltip cursor={{fill: '#F3F4F6'}} />
+                  <Bar dataKey="count" fill="#4F46E5" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
         {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-8 transition-colors duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Filter by:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by:</span>
               <div className="flex space-x-2">
                 {["all", "pending", "in progress", "resolved"].map((filter) => (
                   <button
@@ -225,7 +284,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Complaints Table */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden transition-colors duration-300">
           {loading ? (
             <div className="p-12 text-center text-gray-500">Loading complaints...</div>
           ) : (

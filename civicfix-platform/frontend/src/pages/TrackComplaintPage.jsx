@@ -153,7 +153,7 @@ export default function TrackComplaintPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-8 transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
@@ -168,21 +168,21 @@ export default function TrackComplaintPage() {
           <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg mb-6">
             <span className="text-white text-3xl">🔍</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-800 mb-2">Track Your Complaint</h1>
-          <p className="text-base text-gray-600">Enter your phone number or complaint ID to check status</p>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-2 transition-colors duration-300">Track Your Complaint</h1>
+          <p className="text-base text-gray-600 dark:text-gray-300 transition-colors duration-300">Enter your phone number or complaint ID to check status</p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden transition-colors duration-300">
           {/* Mode Toggle */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-1">
-            <div className="flex rounded-xl bg-white p-1 shadow-inner">
+          <div className="bg-gradient-to-r from-gray-50 dark:from-slate-700 to-gray-100 dark:to-slate-800 p-1 transition-colors duration-300">
+            <div className="flex rounded-xl bg-white dark:bg-slate-900 p-1 shadow-inner transition-colors duration-300">
               <button
                 onClick={() => { setMode('phone'); setResults(null); setInput(''); setError(''); }}
                 className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
                   mode === 'phone' 
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
-                    : 'text-gray-600 hover:text-gray-900'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <span className="mr-2">📱</span>
@@ -193,7 +193,7 @@ export default function TrackComplaintPage() {
                 className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
                   mode === 'id' 
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
-                    : 'text-gray-600 hover:text-gray-900'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <span className="mr-2">🆔</span>
@@ -216,7 +216,7 @@ export default function TrackComplaintPage() {
                       ? "Enter 10-digit phone number" 
                       : "Enter Complaint ID (e.g., CMP_874123)"
                     }
-                    className="flex-1 px-8 py-4 border-2 border-gray-200 rounded-l-2xl focus:outline-none focus:border-blue-500 transition-all duration-300 text-lg font-medium"
+                    className="flex-1 px-8 py-4 border-2 border-gray-200 dark:border-slate-700 rounded-l-2xl focus:outline-none focus:border-blue-500 transition-all duration-300 text-lg font-medium bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
                   />
                     <button
                       type="submit"
@@ -280,7 +280,7 @@ export default function TrackComplaintPage() {
         {results && results.length > 0 && (
           <div className="mt-8 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white transition-colors duration-300">
                 Found {results.length} {results.length === 1 ? 'Complaint' : 'Complaints'}
               </h2>
               <button
@@ -294,7 +294,7 @@ export default function TrackComplaintPage() {
             {results.map((complaint, index) => (
               <div
                 key={complaint.complaint_id}
-                className="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
               >
                 {/* Priority Indicator */}
                 <div className={`absolute top-0 left-0 w-1 h-full ${
@@ -316,8 +316,8 @@ export default function TrackComplaintPage() {
                         <h3 className="text-2xl font-black text-gray-900 leading-tight">{complaint.category}</h3>
                         <div className="flex items-center space-x-2 text-base">
                           <span className="font-mono text-blue-600 font-bold">#{complaint.complaint_id}</span>
-                          <span className="text-gray-300">•</span>
-                          <span className="text-gray-600 font-medium">{complaint.address || 'Location not specified'}</span>
+                          <span className="text-gray-300 dark:text-gray-600">•</span>
+                          <span className="text-gray-600 dark:text-gray-300 font-medium">{complaint.address || 'Location not specified'}</span>
                         </div>
                       </div>
                     </div>
@@ -472,12 +472,12 @@ export default function TrackComplaintPage() {
 
         {/* No Results State */}
         {results && results.length === 0 && (
-          <div className="mt-8 bg-white rounded-2xl shadow-xl p-12 text-center">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="mt-8 bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-12 text-center transition-colors duration-300">
+            <div className="w-20 h-20 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-4xl">🔍</span>
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Complaints Found</h3>
-            <p className="text-gray-500 mb-6">We couldn't find any complaints matching your search.</p>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2 transition-colors duration-300">No Complaints Found</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6 transition-colors duration-300">We couldn't find any complaints matching your search.</p>
             <button
               onClick={clearSearch}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"

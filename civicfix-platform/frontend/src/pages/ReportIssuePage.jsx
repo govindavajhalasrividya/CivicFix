@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { useForm } from "react-hook-form";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -74,14 +75,20 @@ export default function ReportIssuePage() {
   const navigate = useNavigate();
   const { location: gpsLocation, error: gpsError, loading: gpsLoading } = useLocation();
   
-  const [form, setForm] = useState(INITIAL_FORM);
+  const { register, handleSubmit: hookFormSubmit, watch, setValue, reset, formState: { errors } } = useForm({
+    defaultValues: INITIAL_FORM,
+    mode: "onChange"
+  });
+
+  const selectedCategory = watch("category");
+  
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [globalError, setGlobalError] = useState("");
   const [success, setSuccess] = useState(null);
   const [duplicateWarning, setDuplicateWarning] = useState(null);
   const [forceSubmit, setForceSubmit] = useState(false);
@@ -109,14 +116,6 @@ export default function ReportIssuePage() {
     }
   }, [gpsLocation]);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-    setError("");
-  };
-
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -125,15 +124,16 @@ export default function ReportIssuePage() {
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowed.includes(file.type)) {
-      setError('Only JPG, JPEG, and PNG images are allowed.');
+      setGlobalError('Only JPG, JPEG, and PNG images are allowed.');
       return;
     }
 
     if (file.size > maxSize) {
-      setError('Image size should be less than 5MB.');
+      setGlobalError('Image size should be less than 5MB.');
       return;
     }
 
+    setGlobalError("");
     setImageFile(file);
     setUploading(true);
 
@@ -154,24 +154,15 @@ export default function ReportIssuePage() {
     }, 200);
   };
 
-  const validate = () => {
-    if (!form.name.trim()) return "Name is required.";
-    if (!/^\d{10}$/.test(form.phone_number)) return "Phone number must be 10 digits.";
-    if (!form.category) return "Please select a category.";
-    if (!form.description.trim()) return "Description is required.";
-    if (!form.address.trim()) return "A reference address is required to help our team locate the issue.";
-    if (!imageUrl) return "Please upload an image.";
-    if (!selectedLocation) return "Please select a location on the map.";
-    return null;
-  };
+  const onSubmit = async (data) => {
+    setGlobalError("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
+    if (!imageUrl) {
+      setGlobalError("Please upload an image.");
+      return;
+    }
+    if (!selectedLocation) {
+      setGlobalError("Please select a location on the map.");
       return;
     }
 
@@ -179,7 +170,7 @@ export default function ReportIssuePage() {
     if (!forceSubmit) {
       try {
         const dupRes = await checkDuplicate({
-          category: form.category,
+          category: data.category,
           latitude: selectedLocation.lat,
           longitude: selectedLocation.lng,
         });
@@ -197,7 +188,7 @@ export default function ReportIssuePage() {
 
     try {
       const payload = {
-        ...form,
+        ...data,
         image_url: imageUrl,
         latitude: selectedLocation.lat,
         longitude: selectedLocation.lng,
@@ -207,7 +198,7 @@ export default function ReportIssuePage() {
       const res = await createComplaint(payload);
       setSuccess(res.data.data);
     } catch (err) {
-      setError(err.response?.data?.message || "Submission failed. Please try again.");
+      setGlobalError(err.response?.data?.message || "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -215,14 +206,14 @@ export default function ReportIssuePage() {
 
   const nextStep = () => {
     if (currentStep === 1 && !selectedLocation) {
-      setError("Please select a location on the map");
+      setGlobalError("Please select a location on the map");
       return;
     }
     if (currentStep === 2 && !imageUrl) {
-      setError("Please upload an image");
+      setGlobalError("Please upload an image");
       return;
     }
-    setError("");
+    setGlobalError("");
     setCurrentStep(currentStep + 1);
   };
 
@@ -236,10 +227,8 @@ export default function ReportIssuePage() {
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-3xl shadow-2xl p-8 text-center relative overflow-hidden">
-            {/* Animated background */}
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
             
-            {/* Success animation */}
             <div className="w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mx-auto mb-6 flex items-center justify-center animate-bounce">
               <span className="text-white text-5xl">✓</span>
             </div>
@@ -263,7 +252,7 @@ export default function ReportIssuePage() {
               <button
                 onClick={() => {
                   setSuccess(null);
-                  setForm(INITIAL_FORM);
+                  reset();
                   setImagePreview(null);
                   setImageUrl("");
                   setCurrentStep(1);
@@ -314,7 +303,7 @@ export default function ReportIssuePage() {
                 onClick={() => {
                   setDuplicateWarning(null);
                   setForceSubmit(true);
-                  handleSubmit(new Event('submit'));
+                  hookFormSubmit(onSubmit)();
                 }}
                 className="w-full bg-white text-gray-700 py-3 rounded-xl font-semibold border-2 border-gray-200 hover:border-yellow-500 hover:text-yellow-600 transition-all duration-300"
               >
@@ -328,19 +317,19 @@ export default function ReportIssuePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-8 transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-block p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg mb-6">
             <span className="text-white text-3xl">📝</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-800 mb-2">Report an Issue</h1>
-          <p className="text-base text-gray-600">Help us make your city better by reporting civic problems</p>
+          <h1 className="text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-2 transition-colors duration-300">Report an Issue</h1>
+          <p className="text-base text-gray-600 dark:text-gray-300 transition-colors duration-300">Help us make your city better by reporting civic problems</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-6 transition-colors duration-300">
           <div className="flex items-center justify-between">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center flex-1">
@@ -361,23 +350,22 @@ export default function ReportIssuePage() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-3 text-lg font-bold text-gray-600">
+          <div className="flex justify-between mt-3 text-lg font-bold text-gray-600 dark:text-gray-300 transition-colors duration-300">
             <span>Location</span>
             <span>Evidence</span>
             <span>Details</span>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={hookFormSubmit(onSubmit)}>
           {/* Step 1: Location Selection */}
           {currentStep === 1 && (
-            <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 space-y-6 transition-colors duration-300">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center transition-colors duration-300">
                 <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mr-3">1</span>
                 Select Issue Location
               </h2>
 
-              {/* Location Status */}
               <div className="flex items-center space-x-2 text-sm">
                 {gpsLoading ? (
                   <div className="flex items-center text-gray-400">
@@ -397,7 +385,6 @@ export default function ReportIssuePage() {
                 )}
               </div>
 
-              {/* Map */}
               <div className="rounded-xl overflow-hidden shadow-lg border-2 border-gray-200">
                 <MapContainer
                   center={selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : [20.5937, 78.9629]}
@@ -422,6 +409,8 @@ export default function ReportIssuePage() {
                 </div>
               )}
 
+              {globalError && currentStep === 1 && <p className="text-red-500 text-sm">{globalError}</p>}
+
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -441,8 +430,8 @@ export default function ReportIssuePage() {
 
           {/* Step 2: Image Upload */}
           {currentStep === 2 && (
-            <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 space-y-6 transition-colors duration-300">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center transition-colors duration-300">
                 <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mr-3">2</span>
                 Upload Evidence
               </h2>
@@ -494,6 +483,8 @@ export default function ReportIssuePage() {
                 )}
               </div>
 
+              {globalError && currentStep === 2 && <p className="text-red-500 text-sm">{globalError}</p>}
+
               <div className="flex justify-between">
                 <button
                   type="button"
@@ -520,8 +511,8 @@ export default function ReportIssuePage() {
 
           {/* Step 3: Details Form */}
           {currentStep === 3 && (
-            <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 space-y-6 transition-colors duration-300">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center transition-colors duration-300">
                 <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mr-3">3</span>
                 Issue Details
               </h2>
@@ -529,23 +520,21 @@ export default function ReportIssuePage() {
               <div className="space-y-4">
                 {/* Category Selection */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Category *</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {categories.map((cat) => (
                       <label
                         key={cat.id}
                         className={`relative p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
-                          form.category === cat.id
+                          selectedCategory === cat.id
                             ? 'border-blue-600 bg-blue-50'
                             : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                         }`}
                       >
                         <input
                           type="radio"
-                          name="category"
                           value={cat.id}
-                          checked={form.category === cat.id}
-                          onChange={handleChange}
+                          {...register("category", { required: "Please select a category" })}
                           className="hidden"
                         />
                         <div className="flex items-center space-x-3">
@@ -555,7 +544,7 @@ export default function ReportIssuePage() {
                             <p className="text-xs text-gray-500">{cat.description}</p>
                           </div>
                         </div>
-                        {form.category === cat.id && (
+                        {selectedCategory === cat.id && (
                           <div className="absolute top-2 right-2 w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
                             <span className="text-white text-[10px]">✓</span>
                           </div>
@@ -563,77 +552,84 @@ export default function ReportIssuePage() {
                       </label>
                     ))}
                   </div>
+                  {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Description *</label>
                   <textarea
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
+                    {...register("description", { required: "Description is required" })}
                     rows="3"
                     placeholder="Describe the issue in detail..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                    className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${errors.description ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                   ></textarea>
+                  {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
                 </div>
 
                 {/* Address */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Detailed Address / Location Reference *</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Detailed Address / Location Reference *</label>
                   <textarea
-                    name="address"
-                    value={form.address}
-                    onChange={handleChange}
+                    {...register("address", { required: "A reference address is required" })}
                     rows="2"
                     placeholder="E.g. Near Star Bakery, MG Road, Sector 3..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                    className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${errors.address ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                   ></textarea>
+                  {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>}
                 </div>
 
                 {/* Personal Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Full Name *</label>
                     <input
                       type="text"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
+                      {...register("name", { required: "Name is required" })}
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Phone Number *</label>
                     <input
                       type="tel"
-                      name="phone_number"
-                      value={form.phone_number}
-                      onChange={handleChange}
+                      {...register("phone_number", { 
+                        required: "Phone number is required",
+                        pattern: {
+                          value: /^\d{10}$/,
+                          message: "Phone number must be exactly 10 digits"
+                        }
+                      })}
                       placeholder="10-digit mobile number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${errors.phone_number ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {errors.phone_number && <p className="text-red-500 text-sm mt-1">{errors.phone_number.message}</p>}
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Email (Optional)</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">Email (Optional)</label>
                     <input
                       type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
+                      {...register("email", {
+                        pattern: {
+                          value: /^\S+@\S+$/i,
+                          message: "Invalid email format"
+                        }
+                      })}
                       placeholder="Enter your email address"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                      className={`w-full px-4 py-3 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
                     />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
                   </div>
                 </div>
 
                 {/* Error Message */}
-                {error && (
+                {globalError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p className="text-red-600 text-sm">{error}</p>
+                    <p className="text-red-600 text-sm">{globalError}</p>
                   </div>
                 )}
 

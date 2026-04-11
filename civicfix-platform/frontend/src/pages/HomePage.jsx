@@ -110,7 +110,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300">
       {/* Hero Section with Animated Background */}
       <div className="relative overflow-hidden">
         {/* Animated gradient orbs */}
@@ -127,9 +127,9 @@ export default function HomePage() {
                 Transform Your City
               </span>
               <br />
-              <span className="text-gray-900">One Report at a Time</span>
+              <span className="text-gray-900 dark:text-white transition-colors duration-300">One Report at a Time</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-10 max-w-3xl mx-auto font-medium">
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto font-medium transition-colors duration-300">
               Join thousands of citizens making their neighborhoods better. 
               Report issues instantly, track progress, and celebrate solutions.
             </p>
@@ -143,7 +143,7 @@ export default function HomePage() {
               </Link>
               <Link
                 to="/track"
-                className="px-10 py-5 bg-white text-gray-800 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1.5 transition-all duration-300 border border-gray-200"
+                className="px-10 py-5 bg-white dark:bg-slate-800 text-gray-800 dark:text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1.5 transition-all duration-300 border border-gray-200 dark:border-slate-700"
               >
                 Track Complaint
               </Link>
@@ -157,23 +157,23 @@ export default function HomePage() {
       {/* Features Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">Powerful Features</h2>
-          <p className="text-xl text-gray-600">Everything you need to report and track civic issues</p>
+          <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4 transition-colors duration-300">Powerful Features</h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300 transition-colors duration-300">Everything you need to report and track civic issues</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, idx) => (
             <div
               key={idx}
-              className="group relative bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 cursor-pointer"
+              className="group relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 cursor-pointer"
             >
               <div className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
               <div className="relative">
                 <div className={`w-20 h-20 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 text-4xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 text-lg leading-relaxed">{feature.description}</p>
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 transition-colors duration-300">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed transition-colors duration-300">{feature.description}</p>
               </div>
             </div>
           ))}
@@ -182,18 +182,18 @@ export default function HomePage() {
 
       {/* Interactive Map Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="p-8 border-b border-gray-100">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden transition-colors duration-300">
+          <div className="p-8 border-b border-gray-100 dark:border-slate-700 transition-colors duration-300">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-2">Live Issue Map</h2>
-                <p className="text-gray-600">See what's happening in your neighborhood</p>
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2 transition-colors duration-300">Live Issue Map</h2>
+                <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">See what's happening in your neighborhood</p>
               </div>
               <div className="flex space-x-3 mt-4 md:mt-0">
                 {issues.map((issue, idx) => (
                   <div key={idx} className="flex items-center space-x-1 text-sm">
                     <span>{issue.icon}</span>
-                    <span className="text-gray-600">{issue.title}</span>
+                    <span className="text-gray-600 dark:text-gray-300 transition-colors duration-300">{issue.title}</span>
                   </div>
                 ))}
               </div>
@@ -230,8 +230,8 @@ export default function HomePage() {
       {/* How It Works */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">Simple 3-Step Process</h2>
-          <p className="text-xl text-gray-600">Get started in minutes</p>
+          <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4 transition-colors duration-300">Simple 3-Step Process</h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300 transition-colors duration-300">Get started in minutes</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -242,11 +242,11 @@ export default function HomePage() {
           ].map((item, idx) => (
             <div key={idx} className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl opacity-0 group-hover:opacity-100 blur transition duration-300"></div>
-              <div className="relative bg-white rounded-2xl p-8 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                <div className="text-6xl font-bold text-gray-100 mb-4">{item.step}</div>
+              <div className="relative bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                <div className="text-6xl font-bold text-gray-100 dark:text-slate-700 mb-4 transition-colors duration-300">{item.step}</div>
                 <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
+                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3 transition-colors duration-300">{item.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">{item.description}</p>
               </div>
             </div>
           ))}
@@ -275,7 +275,7 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300">
+      <footer className="bg-slate-900 border-t border-slate-800 text-slate-300 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div className="space-y-4">
